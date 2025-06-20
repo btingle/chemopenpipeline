@@ -52,11 +52,11 @@ enum dockcolortype {
 };
 
 struct db2atom { 
-    string name;
+    string name;        // basic properties
     string type;
     int docktype;
     int color;
-    float charge;
+    float charge;       // solvation data
     float polarsolv;
     float apolarsolv;
     float solv;
@@ -88,4 +88,5 @@ struct db2 {
     float surface;
 };
 
-db2 db2cluster(db2& db, vector<vector<vec3>> conformationsxyz);
+// see the .cpp file
+void db2cluster(db2& db, vector<vector<vec3>> conformationsxyz);

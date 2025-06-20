@@ -1,3 +1,7 @@
+/* db2CDPKit.cpp
+ * Produces .db2 files from molecular files using primarily CDPKit
+ * Author: Benjamin Tingle
+ */
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -55,6 +59,7 @@
 using namespace CDPL;
 using namespace Chem;
 
+// enumerates up to <maxtauts> tautomers from <mol> and emits them to <out>
 bool enumtautomers(BasicMolecule mol, long unsigned int maxtauts, vector<BasicMolecule>& out) {
 
     // tautomerize, protonate
@@ -132,6 +137,7 @@ bool enumtautomers(BasicMolecule mol, long unsigned int maxtauts, vector<BasicMo
     return true;
 }
 
+// generates a conformer ensemble for <mol>, storing the ensemble in <mol>
 bool generateconformers(Molecule& mol) {
 
     ConfGen::ConformerGenerator struct_gen;
@@ -172,6 +178,7 @@ bool generateconformers(Molecule& mol) {
     return true;
 }
 
+// calculates solvation properties for <mol>'s minimum energy conformer, emitting per-atom data to <atom_solv_data_out> and total data to <outtotal>
 bool calcsolvation(MolecularGraph& mol, vector<db2atom>& atom_solv_data_out, db2& outtotal) {
     using namespace OpenBabel;
     stringstream mol2_string;
@@ -299,6 +306,7 @@ bool calcsolvation(MolecularGraph& mol, vector<db2atom>& atom_solv_data_out, db2
     return true;
 }
 
+// calculates/fills out from <atoms_solv_data>/looks up all of the UCSF DOCK-specific per-atom properties of <mol>, performs db2 clustering on conformer data, and emits to <db>
 bool generatedb2(MolecularGraph& mol, vector<db2atom> atoms_solv_data, db2& db) {
     using namespace SybylAtomType;
     int natoms = mol.getNumAtoms();
@@ -444,6 +452,7 @@ bool generatedb2(MolecularGraph& mol, vector<db2atom> atoms_solv_data, db2& db) 
     return true;
 }
 
+// emits a db2 file from <db> to <os>
 bool writedb2(db2& db, ostream& os) {
     char rigbuf[512]; // save this for a little later, we want to calculate something first
     int numrigidheavy = 0; // this value, for M header
@@ -514,7 +523,7 @@ bool writedb2(db2& db, ostream& os) {
     return true;
 }
 
-// evil macro function for more prettiness and compactness
+// evil macro function for more prettiness and compactness in mol2db2_CDPKit function
 // times FUNC_CALL with std::chrono, continues if function returns false
 #define TIME_FUNCTION_OR_CONTINUE(FUNC_CALL, TOTAL_TIME)                    \
 {                                                                           \
@@ -528,6 +537,7 @@ bool writedb2(db2& db, ostream& os) {
     cout << dur << "ms elapsed for "#FUNC_CALL << endl;                     \
 }            
 
+// produces db2 files from the molecular data in the file referenced by <fname>
 void mol2db2_CDPKit(string fname) {
 
     using namespace chrono;

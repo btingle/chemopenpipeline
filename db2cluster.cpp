@@ -34,11 +34,10 @@ struct groupentry {
     groupentry() {}
 };
 
-// input: list of 3d vectors, tolerance distance for clustering
-// output: group affinity map for each vector- 0 = clustered to vec 0, 1 = clustered to vec1 etc...
-// ex:
-// tol = 0.5, l = {(0.7, 1, 1), (0.9, 2, 2), (1, 1, 1), (1.3, 2, 2)} => {0, 1, 0, 1}
-vector<int> fast3dcluster(vector<vec3> inlist, int n, map<int, int>& group_map, float tol=0.01) {
+// given <inlist>, a list of 3D points, clusters points together if they are within <tol> distance of one another
+// <group_map> keeps track of unique groupings across runs- mapping the groupings's raw hash to a legible ID number
+// emits a list of group ID numbers, each corresponding to an entry from <inlist>
+vector<int> fast3dcluster(vector<vec3> inlist, map<int, int>& group_map, float tol=0.01) {
     float tol2 = tol*tol;
 
     vector<vec3entry> l;
@@ -126,8 +125,8 @@ vector<int> fast3dcluster(vector<vec3> inlist, int n, map<int, int>& group_map, 
     return sout;
 }
 
-// db should already have sets filled out (without group_id info) as well as atoms and bonds
-db2 db2cluster(db2& db, vector<vector<vec3>> conformationsxyz) {
+// given <db> and a raw conformation ensemble <conformationsxyz>, performs db2 clustering and emits the data back to <db>
+void db2cluster(db2& db, vector<vector<vec3>> conformationsxyz) {
 
     int natoms = db.atoms.size();
     int nconfs = db.sets.size();
@@ -135,7 +134,7 @@ db2 db2cluster(db2& db, vector<vector<vec3>> conformationsxyz) {
     map<int, int> group_map; // keeps track of unique groups between clustering operations
 
     for (int i = 0; i < natoms; i++) {
-        vector<int> atom_groups = fast3dcluster(conformationsxyz[i], nconfs, group_map);
+        vector<int> atom_groups = fast3dcluster(conformationsxyz[i], group_map);
         groups_by_atom.push_back(atom_groups);
     }
 
@@ -149,9 +148,6 @@ db2 db2cluster(db2& db, vector<vector<vec3>> conformationsxyz) {
         for (int j = 0; j < natoms; j++) { // transpose column (per-atom) data to row (per-conformation) data
             setdata.push_back(db2coord(conformationsxyz[j][i], j, groups_by_atom[j][i]));
         }
-        /*struct {
-            bool operator()(db2coord a, db2coord b) { return a.groupi < b.groupi; }
-        } compcoordgid;*/
         function<bool(db2coord, db2coord)> compcoordgid = [](db2coord a, db2coord b) {
             return a.groupi < b.groupi;
         };
@@ -182,8 +178,4 @@ db2 db2cluster(db2& db, vector<vector<vec3>> conformationsxyz) {
         }
         pushgroup();
     }
-
-    cout << ngroups << " groups found for " << nconfs << " confs" << endl;
-
-    return db;
 }
