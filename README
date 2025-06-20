@@ -1,0 +1,13 @@
+~~~ THE UCSF DOCK DB2 BUILD PIPELINE : THE OPEN SOURCE C++ REVENGEANCE ~~~
+
+Welcome! This is a streamlined and fully open-source C++ version of the UCSF DOCK DB2 build scripts.
+Main Changes:
+* Now using fully open source software!
+* Much faster!
+* The various interacting python and shell scripts from the original pipeline have been collectively integrated into a single C++ program
+* With the exception of AMSOL, this program spawns no child processes and utilizes the minimum possible file I/O
+
+Dependencies:
+CDPKit    : substituting for OMEGA, RDKit, and ChemAxon CXCalc
+OpenBabel : converts MOL2 to MOPACINT format for AMSOL
+AMSOL	  : ancient fortran program doing what it has always done!

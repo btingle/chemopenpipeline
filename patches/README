@@ -1,0 +1,12 @@
+patched the following files:
+
+amsol7.1/port/intcar.f:
+101:            GOTO 70
+102:C           IF(YZA.LT.1.D-4)GOTO 70 
+comment: prevents error complaining about collinear atoms
+	 stupid, but effective
+
+openbabel/src/formats/mopacformat.cpp
+1003:    //ofs << mol.GetTitle() << endl;
+comment: amsol expects only one empty newline after parameters, fix this
+	 just put molecule name etc as part of parameters
